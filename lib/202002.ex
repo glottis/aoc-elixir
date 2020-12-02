@@ -9,14 +9,12 @@ defmodule Aoc202002 do
         String.split(e, ": ", trim: true)
     end)
   end
+
   def matches_rule?([r, s]) do
     [range, x] = String.split(r, " ", trim: true)
     [r0, r1] = String.split(range, "-", trim: true)
-    sum = s |> String.graphemes |> count_letter(x)
-    cond do
-      sum >= String.to_integer(r0) && sum <= String.to_integer(r1) -> true
-      true -> false
-    end
+    sum = s |> String.graphemes |> Enum.count(&(&1 == x))
+    sum >= String.to_integer(r0) && sum <= String.to_integer(r1)
   end
 
   def matches_rule_v2?([r, s]) do
@@ -28,17 +26,8 @@ defmodule Aoc202002 do
       x == Enum.fetch!(ss, String.to_integer(r0) - 1) || x == Enum.fetch!(ss, String.to_integer(r1) - 1) -> true
       true -> false
     end
-  end
 
-  def count_letter(list,x, sum \\ 0)
-  def count_letter([a | rest], x, sum) do
-    cond do
-      a == x -> count_letter(rest, x, sum + 1)
-      true -> count_letter(rest, x, sum)
-    end
   end
-
-  def count_letter([], _x, sum), do: sum
 
   def part1 do
     input() |> Enum.filter(&Aoc202002.matches_rule?/1) |> Enum.count()
