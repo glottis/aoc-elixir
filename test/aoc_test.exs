@@ -22,4 +22,13 @@ defmodule AocTest do
     assert AocIntcode.processPrg([1,1,1,4,99,5,6,0,99]) == [30,1,1,4,2,5,6,0,99]
   end
 
+  test "Aoc202002" do
+    x = ["1-3 a: abcde",
+    "1-3 b: cdefg",
+    "2-9 c: ccccccccc"]
+
+    assert x |> Aoc202002.fixInput() |> Enum.filter(&Aoc202002.matches_rule?/1) |> Enum.count == 2
+
+  end
+
 end
