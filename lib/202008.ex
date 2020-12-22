@@ -18,7 +18,7 @@ end
 
 def part2 do
   input()
-  |> twister
+  |> each_for_traverse
 end
 
 def traverse(x, index \\ 0, acc \\ 0)
@@ -44,18 +44,18 @@ defp upd_list(x, index, func) do
   end
 end
 
-def twister(x), do: twister(x, x, 0)
-def twister([], _m, _index), do: :error_no_match
-def twister([%{op: op} | rest], m, index) when op == "nop" or op == "jmp" do
+def each_for_traverse(x), do: each_for_traverse(x, x, 0)
+def each_for_traverse([], _m, _index), do: :error_no_match
+def each_for_traverse([%{op: op} | rest], m, index) when op == "nop" or op == "jmp" do
 
   new = upd_list(m, index, op)
   case traverse(new) do
     {:correct, acc} -> acc
     {:seen, _acc} ->
-      twister(rest, m, index + 1)
+      each_for_traverse(rest, m, index + 1)
   end
 end
 
-def twister([_x | rest], m, index), do: twister(rest, m, index + 1)
+def each_for_traverse([_x | rest], m, index), do: each_for_traverse(rest, m, index + 1)
 
 end
