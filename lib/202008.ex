@@ -18,7 +18,7 @@ end
 
 def part2 do
   input()
-  |> each_for_traverse
+  |> each_traverse
 end
 
 def traverse(x, index \\ 0, acc \\ 0)
@@ -36,7 +36,6 @@ def traverse(x, index, acc) do
 end
 
 defp upd_list(x, index, func) do
-
   case func do
     "v" -> List.update_at(x, index, fn x -> %{x | visited: x.visited + 1} end)
     "nop" -> List.update_at(x, index, fn x -> %{x | op: "jmp"} end)
@@ -44,18 +43,17 @@ defp upd_list(x, index, func) do
   end
 end
 
-def each_for_traverse(x), do: each_for_traverse(x, x, 0)
-def each_for_traverse([], _m, _index), do: :error_no_match
-def each_for_traverse([%{op: op} | rest], m, index) when op == "nop" or op == "jmp" do
-
+def each_traverse(x), do: each_traverse(x, x, 0)
+def each_traverse([], _m, _index), do: :error_no_match
+def each_traverse([%{op: op} | rest], m, index) when op == "nop" or op == "jmp" do
   new = upd_list(m, index, op)
   case traverse(new) do
     {:correct, acc} -> acc
     {:seen, _acc} ->
-      each_for_traverse(rest, m, index + 1)
+      each_traverse(rest, m, index + 1)
   end
 end
 
-def each_for_traverse([_x | rest], m, index), do: each_for_traverse(rest, m, index + 1)
+def each_traverse([_x | rest], m, index), do: each_traverse(rest, m, index + 1)
 
 end
