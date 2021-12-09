@@ -3,23 +3,49 @@ defmodule Aoc202106 do
     File.read!("./input/202106.txt")
     |> String.split(",", trim: true)
     |> Enum.map(&String.to_integer/1)
+    |> Enum.reduce(%{}, fn el, acc ->
+      Map.update(acc, el, 1, fn v -> v + 1 end)
+    end)
   end
 
   def part1 do
-    input() |> count_fish(80, [], [])
+    input() |> count_fish(80)
+
+    input() |> count_fish(256)
   end
 
-  def count_fish([], target, new_list, new_borns, day),
-    do: count_fish(new_list ++ new_borns, target, [], [], day + 1)
+  def count_fish(map, target, %{}, days, _rounds) when target == days,
+    do: IO.puts("Day #{days}: #{map |> Enum.reduce(0, fn {_k, v}, acc -> acc + v end)}")
 
-  def count_fish(x, target, _new_list, _new_borns, days) when target == days, do: length(x)
-
-  def count_fish([h | t], target, new_list, new_borns, day \\ 0) do
-    new_state = h - 1
-
-    case new_state do
-      -1 -> count_fish(t, target, new_list ++ [6], new_borns ++ [8], day)
-      _ -> count_fish(t, target, new_list ++ [new_state], new_borns, day)
+  defp count_old_state(map, rounds) do
+    case result = map[rounds] do
+      nil -> 0
+      _ -> result
     end
+  end
+
+  def count_fish(map, target, new_map, days, 0 = rounds) do
+    count_old_map = count_old_state(map, rounds)
+
+    count_fish(
+      Map.update(new_map, 6, count_old_map, fn current_val -> count_old_map + current_val end)
+      |> Map.put_new(8, count_old_map),
+      target,
+      %{},
+      days + 1,
+      8
+    )
+  end
+
+  def count_fish(map, target, new_map \\ %{}, days \\ 0, rounds \\ 8) do
+    count_old_state = count_old_state(map, rounds)
+
+    count_fish(
+      map,
+      target,
+      Map.put_new(new_map, rounds - 1, count_old_state),
+      days,
+      rounds - 1
+    )
   end
 end
