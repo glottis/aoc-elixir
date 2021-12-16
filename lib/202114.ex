@@ -4,46 +4,60 @@ defmodule Aoc202114 do
     |> String.split("\n", trim: true)
   end
 
-  def part1 do
-    [template | insertion_rules] = input
+  def part2 do
+    [template | insertion_rules] = input()
+    pairs = template |> String.graphemes() |> fix_pairs()
 
     fixed_rules =
       insertion_rules
       |> Enum.reduce(%{}, fn x, acc ->
-        [k | v] = fix_rule(x)
-        Map.put(acc, k, List.first(v))
+        [k, v] = fix_rule(x)
+        Map.put(acc, k, v)
       end)
 
-    results =
-      handle_insertion(template, fixed_rules, 10)
-      |> String.graphemes()
-      |> Enum.reduce(%{}, fn x, acc -> Map.update(acc, x, 1, fn y -> y + 1 end) end)
+    IO.puts("Steps 10: #{count_pairs(pairs, fixed_rules, 10) |> count_freq}")
 
-    {_k, max} = results |> Enum.max_by(fn {_k, v} -> v end)
-    {_k, min} = results |> Enum.min_by(fn {_k, v} -> v end)
+    IO.puts("Steps 40: #{count_pairs(pairs, fixed_rules, 40) |> count_freq}")
+  end
 
-    IO.puts("Solution one is: #{max - min}")
+  def count_freq(pairs) do
+    new_pairs =
+      pairs
+      |> Enum.reduce(%{}, fn {k, v}, acc ->
+        [a, _b] = k |> String.graphemes()
+        Map.update(acc, a, v, fn y -> y + v end)
+      end)
+
+    min = new_pairs |> Enum.map(fn {_, v} -> v end) |> Enum.min()
+    max = new_pairs |> Enum.map(fn {_, v} -> v end) |> Enum.max()
+
+    max - min + 1
+  end
+
+  def count_pairs(pairs, _rules, target, steps) when target == steps,
+    do: pairs
+
+  def count_pairs(pairs, rules, target, steps \\ 0) do
+    new_pairs =
+      pairs
+      |> Enum.reduce(%{}, fn pair, new_pairs ->
+        {k, v} = pair
+        [a, b] = k |> String.graphemes()
+        to_insert = rules[k]
+        updated_pairs = Map.update(new_pairs, a <> to_insert, v, fn y -> y + v end)
+        Map.update(updated_pairs, to_insert <> b, v, fn y -> y + v end)
+      end)
+
+    count_pairs(new_pairs, rules, target, steps + 1)
+  end
+
+  def fix_pairs([_a], result), do: result
+
+  def fix_pairs([a, b | r], result \\ %{}) do
+    fix_pairs([b | r], Map.put(result, a <> b, 1))
   end
 
   def fix_rule(rule) do
     rule |> String.split(" -> ", trim: true)
-  end
-
-  def insert([b], _rules, results), do: results <> b
-
-  def insert([a, b | t], rules, results \\ "") do
-    v = rules[a <> b]
-    val = a <> v
-    insert([b | t], rules, results <> val)
-  end
-
-  def handle_insertion(_template, _rules, goal, results, steps) when goal == steps, do: results
-
-  def handle_insertion(template, rules, goal, results \\ "", steps \\ 0) do
-    split = template |> String.graphemes()
-
-    results = insert(split, rules)
-
-    handle_insertion(results, rules, goal, results, steps + 1)
   end
 end
