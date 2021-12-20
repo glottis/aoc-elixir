@@ -4,7 +4,7 @@ defmodule Aoc202114 do
     |> String.split("\n", trim: true)
   end
 
-  def part2 do
+  def solver do
     [template | insertion_rules] = input()
     pairs = template |> String.graphemes() |> fix_pairs()
 
@@ -54,7 +54,7 @@ defmodule Aoc202114 do
   def fix_pairs([_a], result), do: result
 
   def fix_pairs([a, b | r], result \\ %{}) do
-    fix_pairs([b | r], Map.put(result, a <> b, 1))
+    fix_pairs([b | r], Map.update(result, a <> b, 1, &(&1 + 1)))
   end
 
   def fix_rule(rule) do
