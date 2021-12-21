@@ -7,18 +7,17 @@ defmodule Aoc202120 do
     first = data |> List.first()
     padding = generate_padding(String.length(first))
 
-    first_padded = add_padding(padding, data)
+    padded = add_padding(padding, data)
 
-    second_padded = first_padded |> Enum.map(fn x -> padding <> x <> padding end)
-
-    [alg | second_padded]
+    [alg | padded]
   end
 
   defp add_padding(padding, list) do
-    [padding] ++ [padding] ++ [padding] ++ list ++ [padding] ++ [padding] ++ [padding]
+    ([padding] ++ [padding] ++ [padding] ++ list ++ [padding] ++ [padding] ++ [padding])
+    |> Enum.map(fn x -> padding <> x <> padding end)
   end
 
-  defp generate_padding(-1, result), do: result
+  defp generate_padding(0, result), do: result
 
   defp generate_padding(len, result \\ "") do
     generate_padding(len - 1, result <> ".")
